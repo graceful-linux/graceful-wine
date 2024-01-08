@@ -1,3 +1,4 @@
+out/
 # Prerequisites
 *.d
 
@@ -10,7 +11,6 @@
 # Linker output
 *.ilk
 *.map
-*.exp
 
 # Precompiled Headers
 *.gch
@@ -29,7 +29,6 @@
 *.dylib
 
 # Executables
-*.exe
 *.out
 *.app
 *.i*86
@@ -43,8 +42,6 @@
 *.pdb
 
 # Kernel Module Compile Results
-*.mod*
-*.cmd
 .tmp_versions/
 modules.order
 Module.symvers
