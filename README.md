@@ -1,170 +1,58 @@
-## INTRODUCTION
+# wine
 
-Wine is a program which allows running Microsoft Windows programs
-(including DOS, Windows 3.x, Win32, and Win64 executables) on Unix.
-It consists of a program loader which loads and executes a Microsoft
-Windows binary, and a library (called Winelib) that implements Windows
-API calls using their Unix, X11 or Mac equivalents.  The library may also
-be used for porting Windows code into native Unix executables.
+> 支持windows应用程序运行的环境
 
-Wine is free software, released under the GNU LGPL; see the file
-LICENSE for the details.
+## 主要命令介绍
 
+|命令|功能|
+|----|----|
+|winetricks|用于下载wine环境下的动态库、字体等资源|
+|wine|wine环境主要程序|
 
-## QUICK START
+> wine32是window 32位程序运行环境，动态库都是32位的;
+> wine64是window 64位程序运行环境，动态库都是64位的。
+> 使用wine64即可
 
-From the top-level directory of the Wine source (which contains this file),
-run:
+## 安装前准备
 
-```
-./configure
-make
-```
+当前wine版本是`wine 9.0.0-4`，使用过程中发现wine有提示，wine的64位环境属于**体验阶段**，尽量使用wine的32位环境。
 
-Then either install Wine:
+在编译wine32的时候依赖一些32位动态库，我们可以通过修改包管理器配置文件，添加32位程序的源来解决此问题，具体做法如下：
+1. 打开 `/etc/pacman.conf`
+    ```shell
+    sudo vim /etc/pacman.conf
+    ```
+2. 在文件末尾添加如下配置
+    ```
+    [multilib]
+    Include = /etc/pacman.d/mirrorlist
+    ```
+3. 更新源
+    ```shell
+    sudo pacman -Sy
+    ```
 
-```
-make install
-```
+> 这里需要注意的是，上述配置中，源地址默认放在`/etc/pacman.d/mirrorlist`中，如果系统中没有此文件，就需要用实际的源地址替代。
+> 不过此文件默认是有的！
 
-Or run Wine directly from the build directory:
+## wine32编译
 
-```
-./wine notepad
-```
+在做了上步`安装前准备`之后，在此源码根目录下执行：
 
-Run programs as `wine program`. For more information and problem
-resolution, read the rest of this file, the Wine man page, and
-especially the wealth of information found at https://www.winehq.org.
+1. 编译前环境检查
+    ```shell
+    ./configure
+    ```
+    如果有任何缺少32位库的报错，直接用包管理器安装即可，直到此命令执行无报错为止。
+2. 开始编译
+    ```shell
+    make -j8
+    ```
+编译完成后即可在当前根目录看到wine的32位二进制程序。
 
+> 我并没有编译 wine32 位环境
 
-## REQUIREMENTS
+## wine64编译
 
-To compile and run Wine, you must have one of the following:
+在此源码根目录直接执行 `./build.sh` 即可，执行成功后在当前目录的 `out/` 下看到生成的 `graceful-wine-9.0.0-4-x86_64.pkg.tar.zst` 安装包，执行 `pacman -U out/graceful-wine-*-x86_64.pkg.tar.zst` 安装即可。
 
-- Linux version 2.0.36 or later
-- FreeBSD 12.4 or later
-- Solaris x86 9 or later
-- NetBSD-current
-- Mac OS X 10.8 or later
-
-As Wine requires kernel-level thread support to run, only the operating
-systems mentioned above are supported.  Other operating systems which
-support kernel threads may be supported in the future.
-
-**FreeBSD info**:
-  See https://wiki.freebsd.org/Wine for more information.
-
-**Solaris info**:
-  You will most likely need to build Wine with the GNU toolchain
-  (gcc, gas, etc.). Warning : installing gas does *not* ensure that it
-  will be used by gcc. Recompiling gcc after installing gas or
-  symlinking cc, as and ld to the gnu tools is said to be necessary.
-
-**NetBSD info**:
-  Make sure you have the USER_LDT, SYSVSHM, SYSVSEM, and SYSVMSG options
-  turned on in your kernel.
-
-**Mac OS X info**:
-  You need Xcode/Xcode Command Line Tools or Apple cctools.  The
-  minimum requirements for compiling Wine are clang 3.8 with the
-  MacOSX10.10.sdk and mingw-w64 v8.  The MacOSX10.14.sdk and later can
-  only build wine64.
-
-**Supported file systems**:
-  Wine should run on most file systems. A few compatibility problems
-  have also been reported using files accessed through Samba. Also,
-  NTFS does not provide all the file system features needed by some
-  applications.  Using a native Unix file system is recommended.
-
-**Basic requirements**:
-  You need to have the X11 development include files installed
-  (called xorg-dev in Debian and libX11-devel in Red Hat).
-  Of course you also need make (most likely GNU make).
-  You also need flex version 2.5.33 or later and bison.
-
-**Optional support libraries**:
-  Configure will display notices when optional libraries are not found
-  on your system. See https://wiki.winehq.org/Recommended_Packages for
-  hints about the packages you should install. On 64-bit platforms,
-  you have to make sure to install the 32-bit versions of these
-  libraries.
-
-
-## COMPILATION
-
-To build Wine, do:
-
-```
-./configure
-make
-```
-
-This will build the program "wine" and numerous support libraries/binaries.
-The program "wine" will load and run Windows executables.
-The library "libwine" ("Winelib") can be used to compile and link
-Windows source code under Unix.
-
-To see compile configuration options, do `./configure --help`.
-
-For more information, see https://wiki.winehq.org/Building_Wine
-
-
-## SETUP
-
-Once Wine has been built correctly, you can do `make install`; this
-will install the wine executable and libraries, the Wine man page, and
-other needed files.
-
-Don't forget to uninstall any conflicting previous Wine installation
-first.  Try either `dpkg -r wine` or `rpm -e wine` or `make uninstall`
-before installing.
-
-Once installed, you can run the `winecfg` configuration tool. See the
-Support area at https://www.winehq.org/ for configuration hints.
-
-
-## RUNNING PROGRAMS
-
-When invoking Wine, you may specify the entire path to the executable,
-or a filename only.
-
-For example, to run Notepad:
-
-```
-wine notepad            (using the search Path as specified in
-wine notepad.exe         the registry to locate the file)
-
-wine c:\\windows\\notepad.exe      (using DOS filename syntax)
-
-wine ~/.wine/drive_c/windows/notepad.exe  (using Unix filename syntax)
-
-wine notepad.exe readme.txt          (calling program with parameters)
-```
-
-Wine is not perfect, so some programs may crash. If that happens you
-will get a crash log that you should attach to your report when filing
-a bug.
-
-
-## GETTING MORE INFORMATION
-
-- **WWW**: A great deal of information about Wine is available from WineHQ at
-	https://www.winehq.org/ : various Wine Guides, application database,
-	bug tracking. This is probably the best starting point.
-
-- **FAQ**: The Wine FAQ is located at https://www.winehq.org/FAQ
-
-- **Wiki**: The Wine Wiki is located at https://wiki.winehq.org
-
-- **Gitlab**: Wine development is hosted at https://gitlab.winehq.org
-
-- **Mailing lists**:
-	There are several mailing lists for Wine users and developers;
-	see https://www.winehq.org/forums for more information.
-
-- **Bugs**: Report bugs to Wine Bugzilla at https://bugs.winehq.org
-	Please search the bugzilla database to check whether your
-	problem is already known or fixed before posting a bug report.
-
-- **IRC**: Online help is available at channel `#WineHQ` on irc.libera.chat.

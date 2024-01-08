@@ -19,6 +19,7 @@ cpuCount=$(grep -c '^processor' /proc/cpuinfo)
 
 tar cf "${packageName}" ./ANNOUNCE.md \
     ./configure \
+    ./data \
     ./dlls \
     ./libs \
     ./loader \
@@ -56,6 +57,13 @@ license=('MIT')
 groups=('graceful-linux')
 depends=(
     'xorg-server'
+    'cabextract'
+    'zenity'
+    'libclc'
+    'clblast'
+    'sane'
+    'libcapi'
+    'alsa-oss'
     'graceful-linux'
 )
 optdepends=(
@@ -69,7 +77,7 @@ validpgpkeys=('18B65970A361B77D6C7C67C29EE375D12E7A3EB1')
 
 prepare() {
   mkdir build && cd build
-  ../configure --enable-win64 --prefix=/usr/ 
+  ../configure --enable-archs=i386,x86_64 --prefix=/usr/ 
 }
 
 build() {
@@ -80,7 +88,12 @@ build() {
 package() {
   cd build
   make DESTDIR="\$pkgdir" install
-  ln -s "/usr/bin/wine64" "\$pkgdir/usr/bin/wine"
+
+  install -m555 "\$srcdir/data/winetricks" "\$pkgdir/usr/bin/winetricks" 
+
+  if [[ ! -f "\$pkgdir/usr/bin/wine" ]]; then
+      [[ -f "\$pkgdir/usr/bin/wine64" ]] && ln -s "/usr/bin/wine64" "\$pkgdir/usr/bin/wine"
+  fi
 }
 
 EOF
