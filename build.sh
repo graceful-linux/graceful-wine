@@ -80,6 +80,7 @@ build() {
 package() {
   cd build
   make DESTDIR="\$pkgdir" install
+  ln -s "/usr/bin/win64" "\$pkgdir/usr/bin/wine"
 }
 
 EOF
